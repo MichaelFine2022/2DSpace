@@ -1,35 +1,61 @@
 package org.example;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class Main {
     static Player player;
-    public static void setUpTestUI(){
-        JFrame Space = new JFrame("Space Game");
-        Space.setSize(400,400);
-        Space.setVisible(true);
-
-        SpacePanel spacePanel = new SpacePanel();
-        spacePanel.setBackground(Color.BLACK);
-
-        Space.add(spacePanel, BorderLayout.CENTER);
-    }
-    public static void setUpPlayer() throws IOException{
-        player = new Player(0, 0);
-    }
+    static SpacePanel spacePanel;
+    static ArrayList<Planet> planets = new ArrayList<>();
+    
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                setUpTestUI();
+                
                 try {
-                    setUpPlayer();
+                    GameWorld world = new GameWorld();
+
+                    SpacePanel spacePanel = new SpacePanel(world);
+
+                    JFrame frame = new JFrame("2D Space");
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    frame.add(spacePanel);
+                    frame.pack();
+                    frame.setLocationRelativeTo(null);
+                    frame.setVisible(true);
+
+                    GameController controller = new GameController(world, spacePanel);
+                    controller.start();
+                    
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                
             }
         });
+    }
+    public static void updateGameState() {
+        if (player.isLanded()) {
+            player.setCanLand(false);
+            return;
+        }
+
+        double playerCenterX = player.getX() + player.getSize() / 2.0;
+        double playerCenterY = player.getY() + player.getSize() / 2.0;
+
+        boolean isNearAnyPlanet = false;
+        for (Planet planet : planets) {
+            double dx = playerCenterX - planet.getX();
+            double dy = playerCenterY - planet.getY();
+            double distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < planet.getRadius() + 30) {
+                isNearAnyPlanet = true;
+                break; 
+            }
+        }
+        player.setCanLand(isNearAnyPlanet);
     }
 }

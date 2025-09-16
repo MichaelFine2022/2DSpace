@@ -4,15 +4,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 
-// The View: Only knows how to draw the GameWorld
 public class SpacePanel extends JPanel {
     private GameWorld world;
-
+    private Starfield starfield;
     public SpacePanel(GameWorld world) {
-        this.world = world;
+        
         setPreferredSize(new Dimension(1000, 800));
         setBackground(Color.BLACK);
         setFocusable(true);
+        this.world = world;
+        this.starfield = new Starfield(1000, getPreferredSize().width, getPreferredSize().height);
     }
 
     @Override
@@ -26,7 +27,7 @@ public class SpacePanel extends JPanel {
         double cameraX = player.getX() - getWidth() / 2.0;
         double cameraY = player.getY() - getHeight() / 2.0;
         g2d.translate(-cameraX, -cameraY);
-
+        starfield.draw(g2d);
         for (Planet planet : world.getPlanets()) {
             planet.draw(g2d);
         }
@@ -51,5 +52,14 @@ public class SpacePanel extends JPanel {
         } else if (player.canLand()) {
             g.drawString("In landing range. Press L to land.", 10, 20);
         }
+    }
+
+    public void updateStarfield() {
+        Player player = world.getPlayer();
+        int camX = (int) (player.getX() - getWidth() / 2.0);
+        int camY = (int) (player.getY() - getHeight() / 2.0);
+        Rectangle cameraBounds = new Rectangle(camX, camY, getWidth(), getHeight());
+
+        starfield.update(cameraBounds);
     }
 }

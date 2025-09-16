@@ -63,6 +63,7 @@ class GameController extends KeyAdapter implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         handleInput();
+        view.updateStarfield();
         world.update();
         view.repaint();
     }

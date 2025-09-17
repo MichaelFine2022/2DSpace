@@ -4,26 +4,38 @@ import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 
-// The Model: Holds all game data and logic.
 public class GameWorld {
     private Player player;
-    private ArrayList<Planet> planets = new ArrayList<>();
+    private ArrayList<StarSystem> universe = new ArrayList<>();
+    private int currentSystemIndex = 0;
 
     public GameWorld() throws IOException {
-        //create player and planets
         player = new Player(50, 50);
 
-        planets.add(new Planet(200, 200, 50, Color.decode("#42a5f5")));
-        planets.add(new Planet(600, 450, 80, Color.decode("#ef5350")));
-        planets.add(new Planet(900, 150, 65, Color.decode("#66bb6a")));
+        StarSystem sol = new StarSystem("Sol");
+        sol.addPlanet(new Planet(200, 200, 50, Color.decode("#42a5f5"))); // Earth
+        sol.addPlanet(new Planet(600, 450, 80, Color.decode("#ef5350"))); // Mars
+        universe.add(sol);
+
+        StarSystem alphaCentauri = new StarSystem("Alpha Centauri");
+        alphaCentauri.addPlanet(new Planet(350, 400, 120, Color.decode("#ffca28"))); 
+        universe.add(alphaCentauri);
     }
 
-    // updates game state
     public void update() {
         player.update();
         checkLandingProximity();
     }
+    public void jumpToNextSystem() {
+        if (player.isLanded()) {
+            return;
+        }
 
+        currentSystemIndex = (currentSystemIndex + 1) % universe.size();
+        
+        player.setPosition(50, 50);
+        player.resetVelocity();
+    }
     private void checkLandingProximity() {
         if (player.isLanded()) {
             player.setCanLand(false);
@@ -34,7 +46,7 @@ public class GameWorld {
         double playerCenterY = player.getY() + player.getSize() / 2.0;
 
         boolean isNearAnyPlanet = false;
-        for (Planet planet : planets) {
+        for (Planet planet : getCurrentSystem().getPlanets()) {
             double dx = playerCenterX - planet.getX();
             double dy = playerCenterY - planet.getY();
             double distance = Math.sqrt(dx * dx + dy * dy);
@@ -52,6 +64,10 @@ public class GameWorld {
     }
 
     public ArrayList<Planet> getPlanets() {
-        return planets;
+        return getCurrentSystem().getPlanets();
+    }
+
+    public StarSystem getCurrentSystem() {
+        return universe.get(currentSystemIndex);
     }
 }

@@ -104,4 +104,14 @@ public class Player{
             land();
         }
     }
+
+    public void setPosition(double x, double y) {
+        this.x = x;
+        this.y =y;
+    }
+
+    public void resetVelocity() {
+        this.velocityX = 0;
+        this.velocityY = 0;
+    }
 }

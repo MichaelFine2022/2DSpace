@@ -46,7 +46,8 @@ public class SpacePanel extends JPanel {
         Player player = world.getPlayer();
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 14));
-
+        g.drawString("System: " + world.getCurrentSystem().getName(), 10, 40);
+        g.drawString("Press 'J' to Jump", 10, 60);
         if (player.isLanded()) {
             g.drawString("Landed. Press SPACE to take off.", 10, 20);
         } else if (player.canLand()) {

@@ -45,6 +45,10 @@ class GameController extends KeyAdapter implements ActionListener {
                 world.getPlayer().takeoff();
             }
         }
+
+        if (e.getKeyCode() == KeyEvent.VK_J) {
+            world.jumpToNextSystem();
+        }
     }
 
     private void handleInput() {

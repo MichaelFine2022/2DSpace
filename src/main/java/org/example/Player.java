@@ -6,36 +6,69 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-public class Player{
-    private double x, y;
-    private final int size = 50;
-    public double centerX = x + size/2;
-    public double centerY = y + size/2;
-    public String imageUrl = "/player.png";
-    public Image unScaledImage = ImageIO.read(getClass().getResource(imageUrl));
-    public Image resultingImage = unScaledImage.getScaledInstance(size, size, Image.SCALE_DEFAULT);
-    private double angle = 0.0;
-    private double rotationSpeed = 0.1;
-    private double thrust = 1;
-    private double velocityX = 0;
-    private double velocityY = 0;
-    private double drag = 0.0;
-    private boolean isLanded = false;
-    private boolean canLand = false;
+public class Player extends BaseShip{
+    public String imageUrl;
+    public Image unScaledImage; 
+    public Image resultingImage;
+    String filename = "/player.png";
+    private int credits = 200;
+    private int cargoCapacity = 50;
+    private HashMap<Commodity, Integer> cargoHold = new HashMap<>();
 
     
 
     public Player(double x, double y) throws IOException{
-        this.x = x;
-        this.y = y;
+        super(x,y);
+        imageUrl = filename;
+        unScaledImage = ImageIO.read(getClass().getResource(imageUrl));
+        resultingImage = unScaledImage.getScaledInstance(size, size, Image.SCALE_DEFAULT);
 
-        
+        for(Commodity item : Commodity.values()) {
+            cargoHold.put(item, 0);
+        }
+        cargoHold.put(Commodity.FOOD,10);
     }
-    
+    public int getCredits() {return credits;}
 
+    public int getCurrentCargoLoad() {
+        return cargoHold.values().stream().mapToInt(Integer::intValue).sum();
+    }
+    public int getCargoCapacity() {
+        return cargoCapacity;
+    }
+    public Map<Commodity, Integer> getCargoHold() { return cargoHold; }
+    
+    public boolean spendCredits(int amount) {
+        if(credits >= amount) {
+            credits -= amount;
+            return true;
+        }
+        return false;
+    }
+    public void addCredits(int amount) {
+        credits += amount;
+    }
+
+    public boolean addCargo(Commodity item, int quantity) {
+        int currentLoad = getCurrentCargoLoad();
+        if(currentLoad + quantity <= cargoCapacity) {
+            cargoHold.put(item, cargoHold.get(item) + quantity);
+            return true;
+        }
+        return false;
+    }
+    public boolean removeCargo(Commodity item, int quantity) {
+        if(cargoHold.get(item) >= quantity) {
+            cargoHold.put(item, cargoHold.get(item)-quantity);
+            return true;
+        }
+        return false;
+    }
     public void draw(Graphics g) throws IOException{
         
         Graphics2D g2d = (Graphics2D) g;
@@ -69,6 +102,7 @@ public class Player{
     }
     public void takeoff(){
         isLanded = false;
+        setCanLand(true);
     }
 
     public boolean isLanded() {
@@ -99,9 +133,13 @@ public class Player{
         }
     }
     
-    public void attemptLanding() {
+    public boolean attemptLanding() {
         if (canLand && !isLanded) {
             land();
+            return true;
+        }
+        else{
+            return false;
         }
     }
 

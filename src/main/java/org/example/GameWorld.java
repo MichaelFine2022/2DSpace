@@ -8,17 +8,19 @@ public class GameWorld {
     private Player player;
     private ArrayList<StarSystem> universe = new ArrayList<>();
     private int currentSystemIndex = 0;
+    private Planet currentLandedPlanet = null;
+    private int selectedTradeItemIndex = 0;
 
     public GameWorld() throws IOException {
         player = new Player(50, 50);
 
         StarSystem sol = new StarSystem("Sol");
-        sol.addPlanet(new Planet(200, 200, 50, Color.decode("#42a5f5"))); // Earth
-        sol.addPlanet(new Planet(600, 450, 80, Color.decode("#ef5350"))); // Mars
+        sol.addPlanet(new Planet(200, 200, 50, Color.decode("#42a5f5"), EconomicProfile.INDUSTRIAL)); // Earth
+        sol.addPlanet(new Planet(600, 450, 80, Color.decode("#ef5350"), EconomicProfile.MINING)); // Mars
         universe.add(sol);
 
         StarSystem alphaCentauri = new StarSystem("Alpha Centauri");
-        alphaCentauri.addPlanet(new Planet(350, 400, 120, Color.decode("#ffca28"))); 
+        alphaCentauri.addPlanet(new Planet(350, 400, 120, Color.decode("#ffca28"), EconomicProfile.AGRICULTURAL)); 
         universe.add(alphaCentauri);
     }
 
@@ -41,7 +43,7 @@ public class GameWorld {
             player.setCanLand(false);
             return;
         }
-
+        currentLandedPlanet = null;
         double playerCenterX = player.getX() + player.getSize() / 2.0;
         double playerCenterY = player.getY() + player.getSize() / 2.0;
 
@@ -53,10 +55,29 @@ public class GameWorld {
 
             if (distance < planet.getRadius() + 30) {
                 isNearAnyPlanet = true;
+                currentLandedPlanet = planet;
                 break;
             }
         }
         player.setCanLand(isNearAnyPlanet);
+    }
+    public Planet landOnPlanet() {
+        if(player.attemptLanding()) {
+            return currentLandedPlanet;
+        }
+        return null;
+    }
+
+    public Planet getCurrentLandedPlanet() {
+        return currentLandedPlanet;
+    }
+
+    public int getSelectedTradeItemIndex() {
+        return selectedTradeItemIndex;
+    }
+    
+    public void setSelectedTradeItemIndex(int index) {
+        this.selectedTradeItemIndex = index;
     }
 
     public Player getPlayer() {

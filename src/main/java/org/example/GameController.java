@@ -7,7 +7,7 @@ import java.util.Set;
 
 import javax.swing.Timer;
 
-import java.awt.event.ActionListener; 
+import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 
@@ -16,6 +16,10 @@ class GameController extends KeyAdapter implements ActionListener {
     private SpacePanel view;
     private Timer gameLoop;
     private final Set<Integer> pressedKeys = new HashSet<>();
+    private GameState currentState = GameState.FLYING;
+    private Planet currentPlanet = null;
+    private int selectedCommodityIndex = 0;
+    private Commodity[] allCommodities = Commodity.values();
 
     public GameController(GameWorld world, SpacePanel view) {
         this.world = world;
@@ -30,45 +34,99 @@ class GameController extends KeyAdapter implements ActionListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        pressedKeys.add(e.getKeyCode());
+        if(currentState == GameState.LANDED) {
+            if(e.getKeyCode() == KeyEvent.VK_UP) {
+                selectedCommodityIndex = (selectedCommodityIndex - 1 + allCommodities.length) % allCommodities.length;
+                world.setSelectedTradeItemIndex(selectedCommodityIndex);
+            }
+            if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                selectedCommodityIndex = (selectedCommodityIndex + 1) % allCommodities.length;
+                world.setSelectedTradeItemIndex(selectedCommodityIndex);
+            }
+            if (e.getKeyCode() == KeyEvent.VK_B) {
+                handleBuy();
+            }
+            if (e.getKeyCode() == KeyEvent.VK_S) {
+                handleSell();
+            }
+        }
+        else {
+            pressedKeys.add(e.getKeyCode());
+        }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        pressedKeys.remove(e.getKeyCode());
-        
-        if (e.getKeyCode() == KeyEvent.VK_L) {
-            world.getPlayer().attemptLanding();
+        if(currentState == GameState.FLYING) {
+            pressedKeys.remove(e.getKeyCode());
+            if (e.getKeyCode() == KeyEvent.VK_L) {
+                Planet landedPlanet = world.landOnPlanet();
+                if(landedPlanet != null) {
+                    currentState = GameState.LANDED;
+                    currentPlanet = landedPlanet;
+                    selectedCommodityIndex = 0;
+                }
+            }
+            if (currentState == GameState.FLYING && e.getKeyCode() == KeyEvent.VK_J) {
+                world.jumpToNextSystem();
+            }
         }
-        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+        
+        if (currentState == GameState.LANDED && e.getKeyCode() == KeyEvent.VK_SPACE) {
             if (world.getPlayer().isLanded()) {
                 world.getPlayer().takeoff();
+                currentState = GameState.FLYING;
+                currentPlanet = null;
             }
         }
 
-        if (e.getKeyCode() == KeyEvent.VK_J) {
-            world.jumpToNextSystem();
+        
+    }
+    private void handleBuy() {
+        Player player = world.getPlayer();
+        Commodity item = allCommodities[selectedCommodityIndex];
+        int price = currentPlanet.getPrices().get(item);
+
+        if(player.getCredits() >= price && player.getCurrentCargoLoad() < player.getCargoCapacity()) {
+            player.spendCredits(price);
+            player.addCargo(item, 1);
+            currentPlanet.buyFromPlanet(item, 1);
         }
     }
+    private void handleSell() {
+        Player player = world.getPlayer();
+        Commodity item = allCommodities[selectedCommodityIndex];
+        int price = currentPlanet.getPrices().get(item);
 
+        if(player.getCargoHold().get(item) > 0){
+            player.addCredits(price);
+            player.removeCargo(item, 1);
+            currentPlanet.sellToPlanet(item, 1);
+        }
+    }
     private void handleInput() {
         Player player = world.getPlayer();
-        if (pressedKeys.contains(KeyEvent.VK_UP)) {
-            player.applyThrust();
+        if(currentState == GameState.FLYING){
+            if (pressedKeys.contains(KeyEvent.VK_UP)) {
+                player.applyThrust();
+            }
+            if (pressedKeys.contains(KeyEvent.VK_LEFT)) {
+                player.rotateLeft();
+            }
+            if (pressedKeys.contains(KeyEvent.VK_RIGHT)) {
+                player.rotateRight();
+            }
         }
-        if (pressedKeys.contains(KeyEvent.VK_LEFT)) {
-            player.rotateLeft();
-        }
-        if (pressedKeys.contains(KeyEvent.VK_RIGHT)) {
-            player.rotateRight();
-        }
+        
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        handleInput();
+        if(currentState == GameState.FLYING) {
+            handleInput();
+            world.update();
+        }
         view.updateStarfield();
-        world.update();
         view.repaint();
     }
 }

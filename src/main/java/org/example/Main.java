@@ -1,6 +1,9 @@
 package org.example;
 
 import javax.swing.*;
+
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -21,10 +24,14 @@ public class Main {
 
                     JFrame frame = new JFrame("2D Space");
                     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    frame.setUndecorated(true);
                     frame.add(spacePanel);
-                    frame.pack();
-                    frame.setLocationRelativeTo(null);
+
+                    GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+                    device.setFullScreenWindow(frame);
+                    
                     frame.setVisible(true);
+                    
 
                     GameController controller = new GameController(world, spacePanel);
                     controller.start();

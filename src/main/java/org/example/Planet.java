@@ -8,8 +8,8 @@ public class Planet {
     private int x, y;
     private int radius;
     private Color color;
-    private EconomicProfile profile;
-    private Map<Commodity, Integer> inventory = new HashMap<>();
+    public EconomicProfile profile;
+    public Map<Commodity, Integer> inventory = new HashMap<>();
     private Map<Commodity, Integer> prices = new HashMap<>();
 
     public Planet(int x, int y, int radius, Color color, EconomicProfile profile) {

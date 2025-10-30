@@ -10,6 +10,7 @@ public class GameWorld {
     private int currentSystemIndex = 0;
     private Planet currentLandedPlanet = null;
     private int selectedTradeItemIndex = 0;
+    private boolean playerCargoFocused = false;
 
     public GameWorld() throws IOException {
         player = new Player(50, 50);
@@ -79,7 +80,14 @@ public class GameWorld {
     public void setSelectedTradeItemIndex(int index) {
         this.selectedTradeItemIndex = index;
     }
-
+    public boolean isPlayerCargoFocused() {
+        return playerCargoFocused;
+    }
+    
+    public void setPlayerCargoFocused(boolean focused) {
+        this.playerCargoFocused = focused;
+    }
+    
     public Player getPlayer() {
         return player;
     }

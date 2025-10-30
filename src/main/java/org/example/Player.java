@@ -19,7 +19,6 @@ public class Player extends BaseShip{
     private int credits = 200;
     private int cargoCapacity = 50;
     private HashMap<Commodity, Integer> cargoHold = new HashMap<>();
-
     
 
     public Player(double x, double y) throws IOException{
@@ -42,7 +41,7 @@ public class Player extends BaseShip{
         return cargoCapacity;
     }
     public Map<Commodity, Integer> getCargoHold() { return cargoHold; }
-    
+
     public boolean spendCredits(int amount) {
         if(credits >= amount) {
             credits -= amount;

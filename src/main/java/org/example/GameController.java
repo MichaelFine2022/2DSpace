@@ -43,11 +43,17 @@ class GameController extends KeyAdapter implements ActionListener {
                 selectedCommodityIndex = (selectedCommodityIndex + 1) % allCommodities.length;
                 world.setSelectedTradeItemIndex(selectedCommodityIndex);
             }
-            if (e.getKeyCode() == KeyEvent.VK_B) {
+            if (e.getKeyCode() == KeyEvent.VK_B && !world.isPlayerCargoFocused()) {
                 handleBuy();
             }
-            if (e.getKeyCode() == KeyEvent.VK_S) {
+            if (e.getKeyCode() == KeyEvent.VK_S && world.isPlayerCargoFocused()) {
                 handleSell();
+            }
+            if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                world.setPlayerCargoFocused(false);
+            }
+            if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                world.setPlayerCargoFocused(true);
             }
         }
         else {
